@@ -17,9 +17,17 @@ const LaunchRequestHandler = {
 
     const item = requestAttributes.t(getRandomItem(Object.keys(recipes.RECIPE_EN_US)));
 
-    const speakOutput = requestAttributes.t('WELCOME_MESSAGE', requestAttributes.t('SKILL_NAME'), item);
-    const repromptOutput = requestAttributes.t('WELCOME_REPROMPT');
+    console.log('LaunchRequestHandler');
+    console.log(item);
 
+    const speakOutput = requestAttributes.t('WELCOME_MESSAGE', requestAttributes.t('SKILL_NAME'), item);
+    console.log('speakOutput');
+    console.log(speakOutput);
+
+    const repromptOutput = requestAttributes.t('WELCOME_REPROMPT');
+    console.log('repromptOutput');
+    console.log(repromptOutput);
+    
     handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
 
     return handlerInput.responseBuilder
