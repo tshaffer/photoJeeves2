@@ -6,11 +6,11 @@ const i18n = require('i18next');
 const sprintf = require('i18next-sprintf-postprocessor');
 const https = require('https');
 const request = require('request');
-
-const dwsManager = require('@brightsign/bs-dws-manager');
-
+const bsCore = require('@brightsign/bscore');
 const bsnConnector = require('@brightsign/bsnconnector');
 const bsnGetSession = bsnConnector.bsnGetSession;
+const bsnConnectorConfig = bsnConnector.bsnConnectorConfig;
+const dwsManager = require('@brightsign/bs-dws-manager');
 
 /* INTENT HANDLERS */
 const LaunchRequestHandler = {
@@ -20,6 +20,8 @@ const LaunchRequestHandler = {
   handle(handlerInput) {
     const requestAttributes = handlerInput.attributesManager.getRequestAttributes();
     const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
+
+    // connectToDevServer();
 
     console.log('invoke getOAuthToken');
     getOAuthToken();
@@ -76,6 +78,55 @@ const LaunchRequestHandler = {
   },
 };
 
+function connectToDevServer() {
+
+  const bsnConnectorConfigData = {
+    "bsConsumerKey": "NotOurRealKey",
+    "deviceSetupSyncSpecServerURL": "http://preview.brightsignnetwork.com:8008",
+    "wsRestUrl": "https://wsdemo.brightsignnetwork.com/rest",
+    "authenticatorClientId": "BrightAuthor:Connect",
+    "authenticatorClientSecret": "6F8933A0-416E-43B7-8162-FBF3DCF6A512",
+    "authenticatorRefreshExpirationInterval": 300000,
+    "authenticatorOAuthClientId": "8ybX72Gt",
+    "authenticatorOAuthClientSecret": "oJkARlw1-Ta2G-5WMo-gKJ3-5RxvHpaD5Ngk",
+    "oAuthTokenUrl": "https://oademo.brightsignnetwork.com/v1/token",
+    "bDeployUrl": "https://provisiondemo.brightsignnetwork.com",
+    "bsnDefaultUrl": "https://preview.brightsignnetwork.com:8443",
+    "bsnAuthEndPoint": "/2017/01/REST/",
+    "bsnRestApiEndPoint": "/2018/09/REST/",
+    "bsnUploadApiEndpoint": "/2017/01/REST/",
+    "fwManifestUrl": "https://bsnm.s3.amazonaws.com/public/FirmwareCompatibilityFile.xml?v=e30ee2bf1aabc6c8022b7f41a491aa53e6d0db8a"
+  };
+
+  const bsnConnectorOverrideProps = {
+    bsnClient: {
+      id: bsnConnectorConfig.authenticatorOAuthClientId,
+      secret: bsnConnectorConfig.authenticatorOAuthClientSecret,
+    },
+    oAuthClient: {
+      id: bsnConnectorConfig.authenticatorClientId,
+      secret: bsnConnectorConfig.authenticatorClientSecret,
+      refreshExpirationInterval: bsnConnectorConfig.authenticatorRefreshExpirationInterval,
+    },
+    oAuthServerConfiguration: {
+      oAuthTokenUrl: bsnConnectorConfigData.oAuthTokenUrl,
+    },
+    bDeployServerConfiguration: {
+      bDeployUrl: bsnConnectorConfig.bDeployUrl
+    },
+    bsnServerConfiguration: {
+      bsnDefaultUrl: bsnConnectorConfig.bsnDefaultUrl,
+      bsnAuthEndpoint: bsnConnectorConfig.bsnAuthEndpoint,
+      bsnRestApiEndpoint: bsnConnectorConfig.bsnRestApiEndpoint,
+      bsnUploadApiEndpoint: bsnConnectorConfig.bsnUploadApiEndpoint,
+    },
+  };
+
+  console.log('invoke bsnConnectorConfig');
+  bsnConnectorConfig(bsnConnectorOverrideProps);
+  console.log('return from bsnConnectorConfig');
+}
+
 function getOAuthToken() {
 
   var jsonBody =
@@ -84,7 +135,7 @@ function getOAuthToken() {
     "username": "ted@brightsign.biz",
     "password": "P@ssw0rd"
   };
-  
+
   request({
     url: 'https://oademo.brightsignnetwork.com/v1/token',
     method: "POST",
@@ -94,13 +145,59 @@ function getOAuthToken() {
     },
     json: true,
     body: jsonBody
-  }, function (error, response, body){
+  }, function (error, response, body) {
 
     console.log('received response');
     console.log('access token');
     console.log(response.body.access_token);
-  });
+
+    // send custom command to BrightSign
+    jsonBody = {
+      'data': {
+        'return immediately': true,
+        'command': 'next'
+      }
+    };
+
+    request({
+      url: 'https://wsdemo.brightsignnetwork.com/rest/v1/custom?destinationType=player&destinationName=D7D834000029',
+      method: "PUT",
+      auth: {
+        'bearer': response.body.access_token,
+      },
+      json: true,
+      body: jsonBody
+    }, function (error, response, body) {
+
+      console.log('error');
+      console.log(error);
+
+      console.log('received response, body:');
+      console.log(response.body);
+
+
+    });
+  })
 }
+
+/*
+request.get('http://some.server.com/', {
+'auth': {
+'bearer': 'bearerToken'
+}
+});
+
+const destination: DwsDestinationEntity = {type: 'player', name: '<device_serial>'};
+
+const payload: DwsPayloadEntity = {
+route: '/v1/custom',
+method: 'PUT',
+data: {
+  command: <command>,
+  returnImmediately: true
+}
+}; 
+*/
 
 const RecipeHandler = {
   canHandle(handlerInput) {
@@ -296,3 +393,30 @@ exports.handler = skillBuilder
   .addRequestInterceptors(LocalizationInterceptor)
   .addErrorHandlers(ErrorHandler)
   .lambda();
+
+/*
+export interface BsnConnectorOverrideProps {
+  bsnClient: BsnClient;
+  oAuthClient: BsnOAuthClient;
+  oAuthServerConfiguration: BsnOAuthServerConfiguration;
+  bDeployServerConfiguration: BsnBDeployServerConfiguration;
+  bsnServerConfiguration: BsnServerConfiguration;
+}
+
+"bsConsumerKey": "NotOurRealKey",
+"deviceSetupSyncSpecServerURL": "http://preview.brightsignnetwork.com:8008",
+"wsRestUrl": "https://wsdemo.brightsignnetwork.com/rest",
+"authenticatorClientId": "BrightAuthor:Connect",
+"authenticatorClientSecret": "6F8933A0-416E-43B7-8162-FBF3DCF6A512",
+"authenticatorRefreshExpirationInterval": 300000,
+"authenticatorOAuthClientId": "8ybX72Gt",
+"authenticatorOAuthClientSecret": "oJkARlw1-Ta2G-5WMo-gKJ3-5RxvHpaD5Ngk",
+"oAuthTokenUrl": "https://oademo.brightsignnetwork.com/v1/token",
+"bDeployUrl": "https://provisiondemo.brightsignnetwork.com",
+"bsnDefaultUrl": "https://preview.brightsignnetwork.com:8443",
+"bsnAuthEndPoint": "/2017/01/REST/",
+"bsnRestApiEndPoint": "/2018/09/REST/",
+"bsnUploadApiEndpoint": "/2017/01/REST/",
+"fwManifestUrl": "https://bsnm.s3.amazonaws.com/public/FirmwareCompatibilityFile.xml?v=e30ee2bf1aabc6c8022b7f41a491aa53e6d0db8a"
+
+*/
