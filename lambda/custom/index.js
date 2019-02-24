@@ -4,6 +4,8 @@
 const Alexa = require('ask-sdk-core');
 const i18n = require('i18next');
 const sprintf = require('i18next-sprintf-postprocessor');
+const https = require('https');
+const request = require('request');
 
 const dwsManager = require('@brightsign/bs-dws-manager');
 
@@ -19,30 +21,33 @@ const LaunchRequestHandler = {
     const requestAttributes = handlerInput.attributesManager.getRequestAttributes();
     const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
 
-    console.log('connect to bsn');
-    const session = bsnGetSession();
-    const userName = 'ted@brightsign.biz';
-    const password = 'admin';
-    const network = 'ted';
-    console.log('invoke session.activate');
-    session.activate(userName, password, network).then( (result) => {
-      console.log('session.activate success');
-      console.log(result);
-      bsnGetSession().fetchOAuthToken()
-      .then((token) => {
-        console.log('fetchOAuthToken success');
-        console.log(token);
-      })
-      .catch( (err) => {
-        console.log('fetchOAuthtoken failure');
-        console.log(err);
-      });
-    })
-    .catch( (err) => {
-      console.log('session activate error');
-      console.log(err);
-    });
-  
+    console.log('invoke getOAuthToken');
+    getOAuthToken();
+
+    // console.log('connect to bsn');
+    // const session = bsnGetSession();
+    // const userName = 'ted@brightsign.biz';
+    // const password = 'admin';
+    // const network = 'ted';
+    // console.log('invoke session.activate');
+    // session.activate(userName, password, network).then((result) => {
+    //   console.log('session.activate success');
+    //   console.log(result);
+    //   bsnGetSession().fetchOAuthToken()
+    //     .then((token) => {
+    //       console.log('fetchOAuthToken success');
+    //       console.log(token);
+    //     })
+    //     .catch((err) => {
+    //       console.log('fetchOAuthtoken failure');
+    //       console.log(err);
+    //     });
+    // })
+    //   .catch((err) => {
+    //     console.log('session activate error');
+    //     console.log(err);
+    //   });
+
     // return bsnGetSession().fetchOAuthToken()
     // .then((token: string) => {
     //     getDwsConnector().fetchFromDevice(payload, destination, token)
@@ -71,10 +76,90 @@ const LaunchRequestHandler = {
   },
 };
 
+function getOAuthToken() {
+
+  var myJSONObject =
+  {
+    "grant_type": "password",
+    "username": "ted@brightsign.biz",
+    "password": "P@ssw0rd"
+  };
+  
+// request.get('http://some.server.com/').auth('username', 'password', false);
+// // or
+// request.get('http://some.server.com/', {
+//   'auth': {
+//     'user': 'username',
+//     'pass': 'password',
+//     'sendImmediately': false
+//   }
+// });
+
+  request({
+    url: 'https://oademo.brightsignnetwork.com/v1/token',
+    method: "POST",
+    auth: {
+      'user': '8ybX72Gt',
+      'pass': 'oJkARlw1-Ta2G-5WMo-gKJ3-5RxvHpaD5Ngk'
+    },
+    json: true,
+    body: myJSONObject
+  }, function (error, response, body){
+
+    console.log('received response, keys are: ');
+    console.log(Object.keys(response));
+
+    console.log('response body');
+    console.log(response.body);
+
+    // console.log(response.IncomingMessage);
+    // console.log(response.IncomingMessage._readableState);
+    // console.log(response.IncomingMessage._readableState.ReadableState);
+
+    // console.log('error');
+    // console.log(error);
+    // console.log('response');
+    // console.log(response);
+
+
+  });
+
+  // const originalOptions = {
+  //   host: 'ec2-18-191-89-162.us-east-2.compute.amazonaws.com',
+  //   path: '/api/repos/r1639420d605/index?delta=true&clear=false',
+  //   port: 8000,
+  //   method: 'PUT'
+  // };
+
+  // const myOptions = {
+  //   host: 'oademo.brightsignnetwork.com',
+  //   path: '/v1/token',
+  //   method: 'POST',
+  //   auth: '8ybX72Gt:oJkARlw1-Ta2G-5WMo-gKJ3-5RxvHpaD5Ngk',
+  //   headers: {
+  //     'Content-Type': 'application/json',
+  //   }
+  // };
+
+  // const req = https.request(options, (res) => {
+  //   console.log('getOAuthToken Success');
+  //   console.log(res);
+  // });
+
+  // req.on('error', (e) => {
+  //   console.log('getOAuthToken failure')
+  //   console.log(e.message);
+  // });
+
+  // // send the request
+  // req.write('');
+  // req.end();
+}
+
 const RecipeHandler = {
   canHandle(handlerInput) {
     return handlerInput.requestEnvelope.request.type === 'IntentRequest'
-            && handlerInput.requestEnvelope.request.intent.name === 'RecipeIntent';
+      && handlerInput.requestEnvelope.request.intent.name === 'RecipeIntent';
   },
   handle(handlerInput) {
     const requestAttributes = handlerInput.attributesManager.getRequestAttributes();
@@ -99,7 +184,7 @@ const RecipeHandler = {
     if (itemName && itemName.toLowerCase() === 'vacations' || itemName.toLowerCase() === 'birthdays') {
       sessionAttributes.speakOutput = itemName;
       handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
-      
+
       console.log('itemName good');
       console.log(itemName);
       console.log(sessionAttributes.speakOutput);
@@ -136,7 +221,7 @@ const RecipeHandler = {
 const HelpHandler = {
   canHandle(handlerInput) {
     return handlerInput.requestEnvelope.request.type === 'IntentRequest'
-            && handlerInput.requestEnvelope.request.intent.name === 'AMAZON.HelpIntent';
+      && handlerInput.requestEnvelope.request.intent.name === 'AMAZON.HelpIntent';
   },
   handle(handlerInput) {
     const requestAttributes = handlerInput.attributesManager.getRequestAttributes();
@@ -155,7 +240,7 @@ const HelpHandler = {
 const RepeatHandler = {
   canHandle(handlerInput) {
     return handlerInput.requestEnvelope.request.type === 'IntentRequest'
-            && handlerInput.requestEnvelope.request.intent.name === 'AMAZON.RepeatIntent';
+      && handlerInput.requestEnvelope.request.intent.name === 'AMAZON.RepeatIntent';
   },
   handle(handlerInput) {
     const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
@@ -170,8 +255,8 @@ const RepeatHandler = {
 const ExitHandler = {
   canHandle(handlerInput) {
     return handlerInput.requestEnvelope.request.type === 'IntentRequest'
-            && (handlerInput.requestEnvelope.request.intent.name === 'AMAZON.StopIntent'
-                || handlerInput.requestEnvelope.request.intent.name === 'AMAZON.CancelIntent');
+      && (handlerInput.requestEnvelope.request.intent.name === 'AMAZON.StopIntent'
+        || handlerInput.requestEnvelope.request.intent.name === 'AMAZON.CancelIntent');
   },
   handle(handlerInput) {
     const requestAttributes = handlerInput.attributesManager.getRequestAttributes();
