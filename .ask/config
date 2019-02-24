@@ -6,12 +6,9 @@
       "merge": {},
       "resources": {
         "manifest": {
-          "eTag": "f21c335ffcc3b1e70db2994144d068d4"
+          "eTag": "fede46912c743875ab2ef02041c649ce"
         },
         "interactionModel": {
-          "de-DE": {
-            "eTag": "47edf4ffecb031b06f35cec9e3066f32"
-          },
           "en-US": {
             "eTag": "5135617869640379f977645b7f71b1be"
           }
@@ -26,7 +23,7 @@
             "codeUri": "lambda/custom",
             "functionName": "ask-custom-how-to-default",
             "handler": "index.handler",
-            "revisionId": "8f4a7d5f-27ea-48d4-b66d-e9547896ea2a",
+            "revisionId": "64d11c34-fb35-4974-837a-538f2704cbd0",
             "runtime": "nodejs8.10"
           }
         ]

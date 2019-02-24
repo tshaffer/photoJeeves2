@@ -13,9 +13,6 @@
           ],
           "name": "PhotoJeeves",
           "description": "Sample Full Description"
-        },
-        "de-DE": {
-          "name": "Assistent für Minecraft in Deutsch"
         }
       },
       "isAvailableWorldwide": true,
