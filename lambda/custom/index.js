@@ -68,11 +68,12 @@ function getOAuthToken() {
     console.log('access token');
     console.log(response.body.access_token);
 
+    const accessToken = response.body.access_token;
     // send custom command to BrightSign
     jsonBody = {
       'data': {
+        'command': 'album!!Test',
         'return immediately': true,
-        'command': 'next'
       }
     };
 
@@ -80,7 +81,7 @@ function getOAuthToken() {
       url: 'https://wsdemo.brightsignnetwork.com/rest/v1/custom?destinationType=player&destinationName=D7D834000029',
       method: "PUT",
       auth: {
-        'bearer': response.body.access_token,
+        'bearer': accessToken,
       },
       json: true,
       body: jsonBody
@@ -91,9 +92,33 @@ function getOAuthToken() {
 
       console.log('received response, body:');
       console.log(response.body);
-      
+
+      jsonBody = {
+        'data': {
+          'command': 'startPlayback',
+          'return immediately': true,
+        }
+      };
+  
+      request({
+        url: 'https://wsdemo.brightsignnetwork.com/rest/v1/custom?destinationType=player&destinationName=D7D834000029',
+        method: "PUT",
+        auth: {
+          'bearer': accessToken,
+        },
+        json: true,
+        body: jsonBody
+      }, function (error, response, body) {
+  
+        console.log('error');
+        console.log(error);
+  
+        console.log('received response, body:');
+        console.log(response.body);
+
+      });
     });
-  })
+  });
 }
 
 const RecipeHandler = {
@@ -324,7 +349,7 @@ function connectToPreviewServer() {
     route: '/v1/custom',
     method: 'PUT',
     data: {
-      command: 'next',
+      command: 'album!!test',
       returnImmediately: true
     }
   };
