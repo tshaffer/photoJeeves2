@@ -12,6 +12,8 @@
             }
           ],
           "samples": [
+            "show album {Item}",
+            "play album {Item}",
             "how can I build a {Item}",
             "how can I build an {Item}",
             "how can I build {Item}",

@@ -15,19 +15,14 @@ const LaunchRequestHandler = {
     const requestAttributes = handlerInput.attributesManager.getRequestAttributes();
     const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
 
-    const item = requestAttributes.t(getRandomItem(Object.keys(recipes.RECIPE_EN_US)));
-
-    console.log('LaunchRequestHandler');
-    console.log(item);
-
-    const speakOutput = requestAttributes.t('WELCOME_MESSAGE', requestAttributes.t('SKILL_NAME'), item);
+    const speakOutput = requestAttributes.t('WELCOME_MESSAGE', requestAttributes.t('SKILL_NAME'));
     console.log('speakOutput');
     console.log(speakOutput);
 
     const repromptOutput = requestAttributes.t('WELCOME_REPROMPT');
     console.log('repromptOutput');
     console.log(repromptOutput);
-    
+
     handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
 
     return handlerInput.responseBuilder
@@ -50,30 +45,39 @@ const RecipeHandler = {
     let itemName;
     if (itemSlot && itemSlot.value) {
       itemName = itemSlot.value.toLowerCase();
+      console.log('RecipeHandler:');
+      console.log(itemName);
+    }
+    else {
+      console.log('No itemSlot found');
+      console.log(itemSlot);
+      console.log(itemSlot.value);
     }
 
     const cardTitle = requestAttributes.t('DISPLAY_CARD_TITLE', requestAttributes.t('SKILL_NAME'), itemName);
-    const myRecipes = requestAttributes.t('RECIPES');
-    const recipe = myRecipes[itemName];
     let speakOutput = "";
 
-    if (recipe) {
-      sessionAttributes.speakOutput = recipe;
-      //sessionAttributes.repromptSpeech = requestAttributes.t('RECIPE_REPEAT_MESSAGE');
+    if (itemName && itemName.toLowerCase() === 'vacations' || itemName.toLowerCase() === 'birthdays') {
+      sessionAttributes.speakOutput = itemName;
       handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
+      
+      console.log('itemName good');
+      console.log(itemName);
+      console.log(sessionAttributes.speakOutput);
+      console.log(cardTitle);
 
       return handlerInput.responseBuilder
         .speak(sessionAttributes.speakOutput) // .reprompt(sessionAttributes.repromptSpeech)
-        .withSimpleCard(cardTitle, recipe)
+        .withSimpleCard(cardTitle, itemName)
         .getResponse();
     }
-    else{
-      speakOutput = requestAttributes.t('RECIPE_NOT_FOUND_MESSAGE');
-      const repromptSpeech = requestAttributes.t('RECIPE_NOT_FOUND_REPROMPT');
+    else {
+      speakOutput = requestAttributes.t('ALBUM_NOT_FOUND_MESSAGE');
+      const repromptSpeech = requestAttributes.t('ALBUM_NOT_FOUND_REPROMPT');
       if (itemName) {
-        speakOutput += requestAttributes.t('RECIPE_NOT_FOUND_WITH_ITEM_NAME', itemName);
+        speakOutput += requestAttributes.t('ALBUM_NOT_FOUND_WITH_ITEM_NAME', itemName);
       } else {
-        speakOutput += requestAttributes.t('RECIPE_NOT_FOUND_WITHOUT_ITEM_NAME');
+        speakOutput += requestAttributes.t('ALBUM_NOT_FOUND_WITHOUT_ITEM_NAME');
       }
       speakOutput += repromptSpeech;
 
@@ -177,7 +181,7 @@ const languageStrings = {
       SKILL_NAME: 'Photo Jeeves',
       WELCOME_MESSAGE: 'Welcome to %s. You can say, play album followed by the album name ... Now, what can I help you with?',
       WELCOME_REPROMPT: 'For instructions on what you can say, please say help me.',
-      DISPLAY_CARD_TITLE: '%s  - Recipe for %s.',
+      DISPLAY_CARD_TITLE: '%s  - Album named %s.',
       HELP_MESSAGE: 'You can say play album followed by the album name, or, you can say exit...Now, what can I help you with?',
       HELP_REPROMPT: 'Hey, you can say play album followed by the album name, or you can say exit...Now, what can I help you with?',
       STOP_MESSAGE: 'Goodbye!',
@@ -185,7 +189,12 @@ const languageStrings = {
       RECIPE_NOT_FOUND_MESSAGE: 'I\'m sorry, I currently do not know ',
       RECIPE_NOT_FOUND_WITH_ITEM_NAME: 'the recipe for %s. ',
       RECIPE_NOT_FOUND_WITHOUT_ITEM_NAME: 'that recipe. ',
-      RECIPE_NOT_FOUND_REPROMPT: 'What else can I help with?'
+      RECIPE_NOT_FOUND_REPROMPT: 'What else can I help with?',
+      ALBUM_REPEAT_MESSAGE: 'Try saying repeat.',
+      ALBUM_NOT_FOUND_MESSAGE: 'I\'m sorry, I currently do not know ',
+      ALBUM_NOT_FOUND_WITH_ITEM_NAME: 'the album %s. ',
+      ALBUM_NOT_FOUND_WITHOUT_ITEM_NAME: 'that album. ',
+      ALBUM_NOT_FOUND_REPROMPT: 'What else can I help with?'
     },
   },
   'en-US': {
