@@ -78,23 +78,13 @@ const LaunchRequestHandler = {
 
 function getOAuthToken() {
 
-  var myJSONObject =
+  var jsonBody =
   {
     "grant_type": "password",
     "username": "ted@brightsign.biz",
     "password": "P@ssw0rd"
   };
   
-// request.get('http://some.server.com/').auth('username', 'password', false);
-// // or
-// request.get('http://some.server.com/', {
-//   'auth': {
-//     'user': 'username',
-//     'pass': 'password',
-//     'sendImmediately': false
-//   }
-// });
-
   request({
     url: 'https://oademo.brightsignnetwork.com/v1/token',
     method: "POST",
@@ -103,57 +93,13 @@ function getOAuthToken() {
       'pass': 'oJkARlw1-Ta2G-5WMo-gKJ3-5RxvHpaD5Ngk'
     },
     json: true,
-    body: myJSONObject
+    body: jsonBody
   }, function (error, response, body){
 
-    console.log('received response, keys are: ');
-    console.log(Object.keys(response));
-
-    console.log('response body');
-    console.log(response.body);
-
-    // console.log(response.IncomingMessage);
-    // console.log(response.IncomingMessage._readableState);
-    // console.log(response.IncomingMessage._readableState.ReadableState);
-
-    // console.log('error');
-    // console.log(error);
-    // console.log('response');
-    // console.log(response);
-
-
+    console.log('received response');
+    console.log('access token');
+    console.log(response.body.access_token);
   });
-
-  // const originalOptions = {
-  //   host: 'ec2-18-191-89-162.us-east-2.compute.amazonaws.com',
-  //   path: '/api/repos/r1639420d605/index?delta=true&clear=false',
-  //   port: 8000,
-  //   method: 'PUT'
-  // };
-
-  // const myOptions = {
-  //   host: 'oademo.brightsignnetwork.com',
-  //   path: '/v1/token',
-  //   method: 'POST',
-  //   auth: '8ybX72Gt:oJkARlw1-Ta2G-5WMo-gKJ3-5RxvHpaD5Ngk',
-  //   headers: {
-  //     'Content-Type': 'application/json',
-  //   }
-  // };
-
-  // const req = https.request(options, (res) => {
-  //   console.log('getOAuthToken Success');
-  //   console.log(res);
-  // });
-
-  // req.on('error', (e) => {
-  //   console.log('getOAuthToken failure')
-  //   console.log(e.message);
-  // });
-
-  // // send the request
-  // req.write('');
-  // req.end();
 }
 
 const RecipeHandler = {
