@@ -11,6 +11,7 @@ const bsnConnector = require('@brightsign/bsnconnector');
 const bsnGetSession = bsnConnector.bsnGetSession;
 const bsnConnectorConfig = bsnConnector.bsnConnectorConfig;
 const dwsManager = require('@brightsign/bs-dws-manager');
+const getDwsConnector = dwsManager.getDwsConnector;
 
 /* INTENT HANDLERS */
 const LaunchRequestHandler = {
@@ -21,10 +22,10 @@ const LaunchRequestHandler = {
     const requestAttributes = handlerInput.attributesManager.getRequestAttributes();
     const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
 
-    // connectToDevServer2();
-    connectToPreviewServer();
-    // console.log('invoke getOAuthToken');
-    // getOAuthToken();
+    // connectToPreviewServer();
+
+    console.log('invoke getOAuthToken');
+    getOAuthToken();
 
     const speakOutput = requestAttributes.t('WELCOME_MESSAGE', requestAttributes.t('SKILL_NAME'));
     console.log('speakOutput');
@@ -90,8 +91,7 @@ function getOAuthToken() {
 
       console.log('received response, body:');
       console.log(response.body);
-
-
+      
     });
   })
 }
@@ -290,218 +290,64 @@ exports.handler = skillBuilder
   .addErrorHandlers(ErrorHandler)
   .lambda();
 
-
-/*
-    // connectToDevServer();
-    // console.log('connect to bsn');
-    // const session = bsnGetSession();
-    // const userName = 'ted@brightsign.biz';
-    // const password = 'admin';
-    // const network = 'ted';
-    // console.log('invoke session.activate');
-    // session.activate(userName, password, network).then((result) => {
-    //   console.log('session.activate success');
-    //   console.log(result);
-    //   bsnGetSession().fetchOAuthToken()
-    //     .then((token) => {
-    //       console.log('fetchOAuthToken success');
-    //       console.log(token);
-    //     })
-    //     .catch((err) => {
-    //       console.log('fetchOAuthtoken failure');
-    //       console.log(err);
-    //     });
-    // })
-    //   .catch((err) => {
-    //     console.log('session activate error');
-    //     console.log(err);
-    //   });
-
-    // return bsnGetSession().fetchOAuthToken()
-    // .then((token: string) => {
-    //     getDwsConnector().fetchFromDevice(payload, destination, token)
-    // .then((response: any) => {
-    //     console.log(response);
-    // })
-    // .catch((error: any) => {
-    //    console.log(error);
-    //      });
-    // });
-
-    function connectToDevServer() {
-
-  const bsnConnectorConfigData = {
-    "bsConsumerKey": "NotOurRealKey",
-    "deviceSetupSyncSpecServerURL": "http://preview.brightsignnetwork.com:8008",
-    "wsRestUrl": "https://wsdemo.brightsignnetwork.com/rest",
-    "authenticatorClientId": "BrightAuthor:Connect",
-    "authenticatorClientSecret": "6F8933A0-416E-43B7-8162-FBF3DCF6A512",
-    "authenticatorRefreshExpirationInterval": 300000,
-    "authenticatorOAuthClientId": "8ybX72Gt",
-    "authenticatorOAuthClientSecret": "oJkARlw1-Ta2G-5WMo-gKJ3-5RxvHpaD5Ngk",
-    "oAuthTokenUrl": "https://oademo.brightsignnetwork.com/v1/token",
-    "bDeployUrl": "https://provisiondemo.brightsignnetwork.com",
-    "bsnDefaultUrl": "https://preview.brightsignnetwork.com:8443",
-    "bsnAuthEndPoint": "/2017/01/REST/",
-    "bsnRestApiEndPoint": "/2018/09/REST/",
-    "bsnUploadApiEndpoint": "/2017/01/REST/",
-    "fwManifestUrl": "https://bsnm.s3.amazonaws.com/public/FirmwareCompatibilityFile.xml?v=e30ee2bf1aabc6c8022b7f41a491aa53e6d0db8a"
-  };
-
-  const bsnConnectorOverrideProps = {
-    bsnClient: {
-      id: bsnConnectorConfig.authenticatorOAuthClientId,
-      secret: bsnConnectorConfig.authenticatorOAuthClientSecret,
-    },
-    oAuthClient: {
-      id: bsnConnectorConfig.authenticatorClientId,
-      secret: bsnConnectorConfig.authenticatorClientSecret,
-      refreshExpirationInterval: bsnConnectorConfig.authenticatorRefreshExpirationInterval,
-    },
-    oAuthServerConfiguration: {
-      oAuthTokenUrl: bsnConnectorConfigData.oAuthTokenUrl,
-    },
-    bDeployServerConfiguration: {
-      bDeployUrl: bsnConnectorConfig.bDeployUrl
-    },
-    bsnServerConfiguration: {
-      bsnDefaultUrl: bsnConnectorConfig.bsnDefaultUrl,
-      bsnAuthEndpoint: bsnConnectorConfig.bsnAuthEndpoint,
-      bsnRestApiEndpoint: bsnConnectorConfig.bsnRestApiEndpoint,
-      bsnUploadApiEndpoint: bsnConnectorConfig.bsnUploadApiEndpoint,
-    },
-  };
-
-  console.log('invoke bsnConnectorConfig');
-  bsnConnectorConfig(bsnConnectorOverrideProps);
-  console.log('return from bsnConnectorConfig');
-}
-
-/*
-request.get('http://some.server.com/', {
-'auth': {
-'bearer': 'bearerToken'
-}
-});
-
-const destination: DwsDestinationEntity = {type: 'player', name: '<device_serial>'};
-
-const payload: DwsPayloadEntity = {
-route: '/v1/custom',
-method: 'PUT',
-data: {
-  command: <command>,
-  returnImmediately: true
-}
-}; 
-
-*/
-
-function connectToDevServer() {
-
-  const bsnConnectorConfigData = {
-    "bsConsumerKey": "NotOurRealKey",
-    "deviceSetupSyncSpecServerURL": "http://preview.brightsignnetwork.com:8008",
-    "wsRestUrl": "https://wsdemo.brightsignnetwork.com/rest",
-    "authenticatorClientId": "BrightAuthor:Connect",
-    "authenticatorClientSecret": "6F8933A0-416E-43B7-8162-FBF3DCF6A512",
-    "authenticatorRefreshExpirationInterval": 300000,
-    "authenticatorOAuthClientId": "8ybX72Gt",
-    "authenticatorOAuthClientSecret": "oJkARlw1-Ta2G-5WMo-gKJ3-5RxvHpaD5Ngk",
-    "oAuthTokenUrl": "https://oademo.brightsignnetwork.com/v1/token",
-    "bDeployUrl": "https://provisiondemo.brightsignnetwork.com",
-    "bsnDefaultUrl": "https://preview.brightsignnetwork.com:8443",
-    "bsnAuthEndPoint": "/2017/01/REST/",
-    "bsnRestApiEndPoint": "/2018/09/REST/",
-    "bsnUploadApiEndpoint": "/2017/01/REST/",
-    "fwManifestUrl": "https://bsnm.s3.amazonaws.com/public/FirmwareCompatibilityFile.xml?v=e30ee2bf1aabc6c8022b7f41a491aa53e6d0db8a"
-  };
-
-  const bsnConnectorOverrideProps = {
-    bsnClient: {
-      id: bsnConnectorConfig.authenticatorOAuthClientId,
-      secret: bsnConnectorConfig.authenticatorOAuthClientSecret,
-    },
-    oAuthClient: {
-      id: bsnConnectorConfig.authenticatorClientId,
-      secret: bsnConnectorConfig.authenticatorClientSecret,
-      refreshExpirationInterval: bsnConnectorConfig.authenticatorRefreshExpirationInterval,
-    },
-    oAuthServerConfiguration: {
-      oAuthTokenUrl: bsnConnectorConfigData.oAuthTokenUrl,
-    },
-    bDeployServerConfiguration: {
-      bDeployUrl: bsnConnectorConfig.bDeployUrl
-    },
-    bsnServerConfiguration: {
-      bsnDefaultUrl: bsnConnectorConfig.bsnDefaultUrl,
-      bsnAuthEndpoint: bsnConnectorConfig.bsnAuthEndpoint,
-      bsnRestApiEndpoint: bsnConnectorConfig.bsnRestApiEndpoint,
-      bsnUploadApiEndpoint: bsnConnectorConfig.bsnUploadApiEndpoint,
-    },
-  };
-
-  console.log('invoke bsnConnectorConfig');
-  bsnConnectorConfig(bsnConnectorOverrideProps);
-  console.log('return from bsnConnectorConfig');
-}
-
-function connectToDevServer2() {
-  const service = {
-    "bsnClient": {
-      "id": "BrightAuthor:Connect",
-      "secret": "6F8933A0-416E-43B7-8162-FBF3DCF6A512"
-    },
-    "oAuthClient": {
-      "id": "8ybX72Gt",
-      "secret": "oJkARlw1-Ta2G-5WMo-gKJ3-5RxvHpaD5Ngk",
-      "refreshExpirationInterval": 300000
-    },
-    "oAuthServerConfiguration": {
-      "oAuthTokenUrl": "https://oastg.brightsignnetwork.com/v1/token"
-    },
-    "bDeployServerConfiguration": {
-      "bDeployUrl": "https://provisionstg.brightsignnetwork.com"
-    },
-    "bsnServerConfiguration": {
-      "bsnDefaultUrl": "https://ast.brightsignnetwork.com",
-      "bsnAuthEndpoint": "/2017/01/REST/",
-      "bsnRestApiEndpoint": "/2018/09/REST/",
-      "bsnUploadApiEndpoint": "/2017/01/REST/"
-    }
-  };
-
-  console.log('invoke bsnConnectorConfig');
-  bsnConnectorConfig(service);
-  console.log('return from bsnConnectorConfig');
-}
+// code to use preview server via BrightSign packages rather than via http
+const previewConfig = {
+  "bsnClient": {
+    "id": "BrightAuthor:Connect",
+    "secret": "6F8933A0-416E-43B7-8162-FBF3DCF6A512"
+  },
+  "oAuthClient": {
+    "id": "8ybX72Gt",
+    "secret": "oJkARlw1-Ta2G-5WMo-gKJ3-5RxvHpaD5Ngk",
+    "refreshExpirationInterval": 300000
+  },
+  "oAuthServerConfiguration": {
+    "oAuthTokenUrl": "https://oademo.brightsignnetwork.com/v1/token"
+  },
+  "bDeployServerConfiguration": {
+    "bDeployUrl": "https://provisiondemo.brightsignnetwork.com"
+  },
+  "bsnServerConfiguration": {
+    "bsnDefaultUrl": "https://preview.brightsignnetwork.com",
+    "bsnAuthEndpoint": "/2017/01/REST/",
+    "bsnRestApiEndpoint": "/2018/09/REST/",
+    "bsnUploadApiEndpoint": "/2017/01/REST/"
+  }
+};
 
 function connectToPreviewServer() {
-  const service = {
-    "bsnClient": {
-      "id": "BrightAuthor:Connect",
-      "secret": "6F8933A0-416E-43B7-8162-FBF3DCF6A512"
-    },
-    "oAuthClient": {
-      "id": "8ybX72Gt",
-      "secret": "oJkARlw1-Ta2G-5WMo-gKJ3-5RxvHpaD5Ngk",
-      "refreshExpirationInterval": 300000
-    },
-    "oAuthServerConfiguration": {
-      "oAuthTokenUrl": "https://oademo.brightsignnetwork.com/v1/token"
-    },
-    "bDeployServerConfiguration": {
-      "bDeployUrl": "https://provisiondemo.brightsignnetwork.com"
-    },
-    "bsnServerConfiguration": {
-      "bsnDefaultUrl": "https://preview.brightsignnetwork.com",
-      "bsnAuthEndpoint": "/2017/01/REST/",
-      "bsnRestApiEndpoint": "/2018/09/REST/",
-      "bsnUploadApiEndpoint": "/2017/01/REST/"
+
+  bsnConnectorConfig(previewConfig);
+
+  const destination = {type: 'player', name: 'D7D834000029'};
+  const payload = {
+    route: '/v1/custom',
+    method: 'PUT',
+    data: {
+      command: 'next',
+      returnImmediately: true
     }
   };
 
-  console.log('connectToPreviewServer: invoke bsnConnectorConfig');
-  bsnConnectorConfig(service);
-  console.log('connectToPreviewServer: return from bsnConnectorConfig');
+  const session = bsnGetSession();
+  const userName = 'ted@brightsign.biz';
+  const password = 'P@ssw0rd';
+  console.log('invoke session.activate');
+  session.activate(userName, password)
+    .then( () => {
+      console.log('session.activate success');
+      console.log('invoke bsnGetSession.fetchOAuthToken()');
+      return bsnGetSession().fetchOAuthToken()
+    }).then((token) => {
+      console.log('token:');
+      console.log(token);
+      console.log('invoke fetchFromDevice invoked');
+      return getDwsConnector().fetchFromDevice(payload, destination, token)
+    }).then((response) => {
+      console.log('return from getDwsConnector, response:');
+      console.log(response);
+    }).catch((error) => {
+      console.log('error');
+      console.log(error);
+    });
 }
