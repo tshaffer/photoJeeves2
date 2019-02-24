@@ -12,6 +12,9 @@
     "ask-sdk-core": "^2.0.0",
     "ask-sdk-model": "^1.0.0",
     "i18next": "^10.5.0",
-    "i18next-sprintf-postprocessor": "^0.2.2"
+    "i18next-sprintf-postprocessor": "^0.2.2",
+    "@brightsign/bsnconnector": "0.4.19",
+    "@brightsign/bscore": "0.5.9",
+    "@brightsign/bs-dws-manager": "0.0.8"
   }
 }
