@@ -193,11 +193,6 @@ const languageStrings = {
       SKILL_NAME: 'Photo Jeeves'
     },
   },
-  'en-GB': {
-    translation: {
-      SKILL_NAME: 'British Minecraft Helper'
-    },
-  },
   de: {
     translation: {
       SKILL_NAME: 'Assistent für Minecraft in Deutsch',
