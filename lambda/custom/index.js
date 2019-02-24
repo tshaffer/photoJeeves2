@@ -5,6 +5,11 @@ const Alexa = require('ask-sdk-core');
 const i18n = require('i18next');
 const sprintf = require('i18next-sprintf-postprocessor');
 
+const dwsManager = require('@brightsign/bs-dws-manager');
+
+const bsnConnector = require('@brightsign/bsnconnector');
+const bsnGetSession = bsnConnector.bsnGetSession;
+
 /* INTENT HANDLERS */
 const LaunchRequestHandler = {
   canHandle(handlerInput) {
@@ -13,6 +18,41 @@ const LaunchRequestHandler = {
   handle(handlerInput) {
     const requestAttributes = handlerInput.attributesManager.getRequestAttributes();
     const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
+
+    console.log('connect to bsn');
+    const session = bsnGetSession();
+    const userName = 'ted@brightsign.biz';
+    const password = 'admin';
+    const network = 'ted';
+    console.log('invoke session.activate');
+    session.activate(userName, password, network).then( (result) => {
+      console.log('session.activate success');
+      console.log(result);
+      bsnGetSession().fetchOAuthToken()
+      .then((token) => {
+        console.log('fetchOAuthToken success');
+        console.log(token);
+      })
+      .catch( (err) => {
+        console.log('fetchOAuthtoken failure');
+        console.log(err);
+      });
+    })
+    .catch( (err) => {
+      console.log('session activate error');
+      console.log(err);
+    });
+  
+    // return bsnGetSession().fetchOAuthToken()
+    // .then((token: string) => {
+    //     getDwsConnector().fetchFromDevice(payload, destination, token)
+    // .then((response: any) => {
+    //     console.log(response);
+    // })
+    // .catch((error: any) => {
+    //    console.log(error);
+    //      });
+    // });
 
     const speakOutput = requestAttributes.t('WELCOME_MESSAGE', requestAttributes.t('SKILL_NAME'));
     console.log('speakOutput');
