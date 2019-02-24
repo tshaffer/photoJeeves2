@@ -2,7 +2,6 @@
 /* eslint-disable  no-console */
 
 const Alexa = require('ask-sdk-core');
-const recipes = require('./recipes');
 const i18n = require('i18next');
 const sprintf = require('i18next-sprintf-postprocessor');
 
@@ -103,10 +102,8 @@ const HelpHandler = {
     const requestAttributes = handlerInput.attributesManager.getRequestAttributes();
     const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
 
-    const item = requestAttributes.t(getRandomItem(Object.keys(recipes.RECIPE_EN_US)));
-
-    sessionAttributes.speakOutput = requestAttributes.t('HELP_MESSAGE', item);
-    sessionAttributes.repromptSpeech = requestAttributes.t('HELP_REPROMPT', item);
+    sessionAttributes.speakOutput = requestAttributes.t('HELP_MESSAGE');
+    sessionAttributes.repromptSpeech = requestAttributes.t('HELP_REPROMPT');
 
     return handlerInput.responseBuilder
       .speak(sessionAttributes.speakOutput)
@@ -177,7 +174,6 @@ const skillBuilder = Alexa.SkillBuilders.custom();
 const languageStrings = {
   en: {
     translation: {
-      RECIPES: recipes.RECIPE_EN_US,
       SKILL_NAME: 'Photo Jeeves',
       WELCOME_MESSAGE: 'Welcome to %s. You can say, play album followed by the album name ... Now, what can I help you with?',
       WELCOME_REPROMPT: 'For instructions on what you can say, please say help me.',
@@ -185,11 +181,6 @@ const languageStrings = {
       HELP_MESSAGE: 'You can say play album followed by the album name, or, you can say exit...Now, what can I help you with?',
       HELP_REPROMPT: 'Hey, you can say play album followed by the album name, or you can say exit...Now, what can I help you with?',
       STOP_MESSAGE: 'Goodbye!',
-      RECIPE_REPEAT_MESSAGE: 'Try saying repeat.',
-      RECIPE_NOT_FOUND_MESSAGE: 'I\'m sorry, I currently do not know ',
-      RECIPE_NOT_FOUND_WITH_ITEM_NAME: 'the recipe for %s. ',
-      RECIPE_NOT_FOUND_WITHOUT_ITEM_NAME: 'that recipe. ',
-      RECIPE_NOT_FOUND_REPROMPT: 'What else can I help with?',
       ALBUM_REPEAT_MESSAGE: 'Try saying repeat.',
       ALBUM_NOT_FOUND_MESSAGE: 'I\'m sorry, I currently do not know ',
       ALBUM_NOT_FOUND_WITH_ITEM_NAME: 'the album %s. ',
@@ -199,19 +190,16 @@ const languageStrings = {
   },
   'en-US': {
     translation: {
-      RECIPES: recipes.RECIPE_EN_US,
       SKILL_NAME: 'Photo Jeeves'
     },
   },
   'en-GB': {
     translation: {
-      RECIPES: recipes.RECIPE_EN_GB,
       SKILL_NAME: 'British Minecraft Helper'
     },
   },
   de: {
     translation: {
-      RECIPES: recipes.RECIPE_DE_DE,
       SKILL_NAME: 'Assistent für Minecraft in Deutsch',
       WELCOME_MESSAGE: 'Willkommen bei %s. Du kannst beispielsweise die Frage stellen: Welche Rezepte gibt es für eine %s? ... Nun, womit kann ich dir helfen?',
       WELCOME_REPROMPT: 'Wenn du wissen möchtest, was du sagen kannst, sag einfach „Hilf mir“.',
@@ -219,11 +207,6 @@ const languageStrings = {
       HELP_MESSAGE: 'Du kannst beispielsweise Fragen stellen wie „Wie geht das Rezept für eine %s“ oder du kannst „Beenden“ sagen ... Wie kann ich dir helfen?',
       HELP_REPROMPT: 'Du kannst beispielsweise Sachen sagen wie „Wie geht das Rezept für eine %s“ oder du kannst „Beenden“ sagen ... Wie kann ich dir helfen?',
       STOP_MESSAGE: 'Auf Wiedersehen!',
-      RECIPE_REPEAT_MESSAGE: 'Sage einfach „Wiederholen“.',
-      RECIPE_NOT_FOUND_MESSAGE: 'Tut mir leid, ich kenne derzeit ',
-      RECIPE_NOT_FOUND_WITH_ITEM_NAME: 'das Rezept für %s nicht. ',
-      RECIPE_NOT_FOUND_WITHOUT_ITEM_NAME: 'dieses Rezept nicht. ',
-      RECIPE_NOT_FOUND_REPROMPT: 'Womit kann ich dir sonst helfen?'
     },
   },
 };
