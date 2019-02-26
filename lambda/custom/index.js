@@ -13,6 +13,8 @@ const bsnConnectorConfig = bsnConnector.bsnConnectorConfig;
 const dwsManager = require('@brightsign/bs-dws-manager');
 const getDwsConnector = dwsManager.getDwsConnector;
 
+var accessToken = '';
+
 /* INTENT HANDLERS */
 const LaunchRequestHandler = {
   canHandle(handlerInput) {
@@ -64,15 +66,19 @@ function getOAuthToken() {
     body: jsonBody
   }, function (error, response, body) {
 
-    console.log('received response');
-    console.log('access token');
+    console.log('received response, accessToken:');
     console.log(response.body.access_token);
 
-    const accessToken = response.body.access_token;
+    accessToken = response.body.access_token;
+  });
+}
+
+const sendPlayAlbum = (albumName) => {
+
     // send custom command to BrightSign
     jsonBody = {
       'data': {
-        'command': 'album!!Test',
+        'command': 'album!!' + albumName.toLowerCase(),
         'return immediately': true,
       }
     };
@@ -115,10 +121,8 @@ function getOAuthToken() {
   
         console.log('received response, body:');
         console.log(response.body);
-
       });
     });
-  });
 }
 
 const RecipeHandler = {
@@ -146,11 +150,30 @@ const RecipeHandler = {
     const cardTitle = requestAttributes.t('DISPLAY_CARD_TITLE', requestAttributes.t('SKILL_NAME'), itemName);
     let speakOutput = "";
 
-    if (itemName && itemName.toLowerCase() === 'vacations' || itemName.toLowerCase() === 'birthdays') {
+    if (accessToken === '') {
+      speakOutput = requestAttributes.t('NO_ACCESS_TOKEN');
+      const repromptSpeech = requestAttributes.t('NO_ACCESS_TOKEN_REPROMPT');
+      speakOutput += repromptSpeech;
+
+      sessionAttributes.speakOutput = speakOutput; //saving speakOutput to attributes, so we can use it to repeat
+      sessionAttributes.repromptSpeech = repromptSpeech;
+
+      handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
+
+      return handlerInput.responseBuilder
+        .speak(sessionAttributes.speakOutput)
+        .reprompt(sessionAttributes.repromptSpeech)
+        .getResponse();
+    }
+    else if (itemName !== '') {
+
+      // check to see if album is in the list
+      sendPlayAlbum(itemName);
+
       sessionAttributes.speakOutput = itemName;
       handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
 
-      console.log('itemName good');
+      console.log('album name specified as:');
       console.log(itemName);
       console.log(sessionAttributes.speakOutput);
       console.log(cardTitle);
@@ -158,6 +181,8 @@ const RecipeHandler = {
       return handlerInput.responseBuilder
         .speak(sessionAttributes.speakOutput) // .reprompt(sessionAttributes.repromptSpeech)
         .withSimpleCard(cardTitle, itemName)
+        .withShouldEndSession(false)
+        // .shouldEndSession(false)
         .getResponse();
     }
     else {
@@ -274,7 +299,9 @@ const languageStrings = {
       ALBUM_NOT_FOUND_MESSAGE: 'I\'m sorry, I currently do not know ',
       ALBUM_NOT_FOUND_WITH_ITEM_NAME: 'the album %s. ',
       ALBUM_NOT_FOUND_WITHOUT_ITEM_NAME: 'that album. ',
-      ALBUM_NOT_FOUND_REPROMPT: 'What else can I help with?'
+      ALBUM_NOT_FOUND_REPROMPT: 'What else can I help with?',
+      NO_ACCESS_TOKEN: 'Unable to login to the BSN server',
+      NO_ACCESS_TOKEN_REPROMPT: 'Try exiting and restarting the application'
     },
   },
   'en-US': {

@@ -40,17 +40,32 @@
           "values": [
             {
               "name": {
-                "value": "vacations"
+                "value": "Print"
               }
             },
             {
               "name": {
-                "value": "hawaii"
+                "value": "Thailand"
               }
             },
             {
               "name": {
-                "value": "birthdays"
+                "value": "test2"
+              }
+            },
+            {
+              "name": {
+                "value": "Trips"
+              }
+            },
+            {
+              "name": {
+                "value": "Scuba"
+              }
+            },
+            {
+              "name": {
+                "value": "2015"
               }
             }
           ],
