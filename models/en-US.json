@@ -33,12 +33,6 @@
           ]
         },
         {
-          "name": "AMAZON.RepeatIntent"
-        },
-        {
-          "name": "AMAZON.HelpIntent"
-        },
-        {
           "name": "AMAZON.StopIntent",
           "samples": [
             "wait",
@@ -47,6 +41,21 @@
             "hold on",
             "just a minute"
           ]
+        },
+        {
+          "name": "RewindIntent",
+          "samples": [
+            "rewind",
+            "go back",
+            "instant replay",
+            "again"
+          ]
+        },
+        {
+          "name": "AMAZON.RepeatIntent"
+        },
+        {
+          "name": "AMAZON.HelpIntent"
         },
         {
           "name": "AMAZON.CancelIntent"

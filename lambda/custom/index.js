@@ -161,6 +161,35 @@ const sendResumePlayback = () => {
   });
 }
 
+const sendRewindPlayback = () => {
+
+  jsonBody = {
+    'data': {
+      'command': 'rewind',
+      'return immediately': true,
+    }
+  };
+
+  console.log('startPlayback');
+
+  request({
+    url: 'https://wsdemo.brightsignnetwork.com/rest/v1/custom?destinationType=player&destinationName=D7D834000029',
+    method: "PUT",
+    auth: {
+      'bearer': accessToken,
+    },
+    json: true,
+    body: jsonBody
+  }, function (error, response, body) {
+
+    console.log('error');
+    console.log(error);
+
+    console.log('received response, body:');
+    console.log(response.body);
+  });
+}
+
 
 const RecipeHandler = {
   canHandle(handlerInput) {
@@ -258,12 +287,16 @@ const StopHandler = {
 
     sendPausePlayback();
 
-    const itemName = 'norway 2017';
-    const cardTitle = requestAttributes.t('DISPLAY_CARD_TITLE', requestAttributes.t('SKILL_NAME'), itemName);
+    const speakOutput = 'pause playback';
+
+    sessionAttributes.speakOutput = speakOutput;
+    sessionAttributes.repromptSpeech = speakOutput;
+
+    const cardTitle = requestAttributes.t('DISPLAY_CARD_TITLE', requestAttributes.t('SKILL_NAME'), speakOutput);
 
     return handlerInput.responseBuilder
     .speak('pause playback')
-    .withSimpleCard(cardTitle, itemName)
+    .withSimpleCard(cardTitle, speakOutput)
     .withShouldEndSession(false)
     .getResponse();
   },
@@ -282,11 +315,44 @@ const ResumeHandler = {
 
     sendResumePlayback();
 
-    const cardTitle = requestAttributes.t('DISPLAY_CARD_TITLE', requestAttributes.t('SKILL_NAME'));
+    const speakOutput = 'resume playback';
+
+    sessionAttributes.speakOutput = speakOutput;
+    sessionAttributes.repromptSpeech = speakOutput;
+
+    const cardTitle = requestAttributes.t('DISPLAY_CARD_TITLE', requestAttributes.t('SKILL_NAME'), speakOutput);
 
     return handlerInput.responseBuilder
-    .speak('resume playback')
-    .withSimpleCard(cardTitle, '')
+    .speak(speakOutput)
+    .withSimpleCard(cardTitle, speakOutput)
+    .withShouldEndSession(false)
+    .getResponse();
+  },
+};
+
+const RewindHandler = {
+  canHandle(handlerInput) {
+    return handlerInput.requestEnvelope.request.type === 'IntentRequest'
+      && handlerInput.requestEnvelope.request.intent.name === 'RewindIntent';
+  },
+  handle(handlerInput) {
+    const requestAttributes = handlerInput.attributesManager.getRequestAttributes();
+    const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
+
+    console.log('RewindIntent received');
+
+    sendRewindPlayback();
+
+    const speakOutput = 'rewind playback';
+
+    sessionAttributes.speakOutput = speakOutput;
+    sessionAttributes.repromptSpeech = speakOutput;
+
+    const cardTitle = requestAttributes.t('DISPLAY_CARD_TITLE', requestAttributes.t('SKILL_NAME'), speakOutput);
+
+    return handlerInput.responseBuilder
+    .speak(speakOutput)
+    .withSimpleCard(cardTitle, speakOutput)
     .withShouldEndSession(false)
     .getResponse();
   },
@@ -419,6 +485,7 @@ exports.handler = skillBuilder
     RecipeHandler,
     StopHandler,
     ResumeHandler,
+    RewindHandler,
     HelpHandler,
     RepeatHandler,
     ExitHandler,
