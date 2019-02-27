@@ -23,6 +23,16 @@
           ]
         },
         {
+          "name": "ResumeIntent",
+          "samples": [
+            "resume",
+            "restart",
+            "continue",
+            "keep going",
+            "go"
+          ]
+        },
+        {
           "name": "AMAZON.RepeatIntent"
         },
         {
@@ -33,7 +43,9 @@
           "samples": [
             "wait",
             "pause",
-            "stop"
+            "stop",
+            "hold on",
+            "just a minute"
           ]
         },
         {
