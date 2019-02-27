@@ -73,6 +73,35 @@ function getOAuthToken() {
   });
 }
 
+const sendPausePlayback = () => {
+
+  jsonBody = {
+    'data': {
+      'command': 'pausePlayback',
+      'return immediately': true,
+    }
+  };
+
+  console.log('pausePlayback');
+
+  request({
+    url: 'https://wsdemo.brightsignnetwork.com/rest/v1/custom?destinationType=player&destinationName=D7D834000029',
+    method: "PUT",
+    auth: {
+      'bearer': accessToken,
+    },
+    json: true,
+    body: jsonBody
+  }, function (error, response, body) {
+
+    console.log('error');
+    console.log(error);
+
+    console.log('received response, body:');
+    console.log(response.body);
+  });
+}
+
 const sendPlayAlbum = (albumName) => {
 
     // send custom command to BrightSign
@@ -208,6 +237,30 @@ const RecipeHandler = {
   }
 };
 
+const StopHandler = {
+  canHandle(handlerInput) {
+    return handlerInput.requestEnvelope.request.type === 'IntentRequest'
+      && handlerInput.requestEnvelope.request.intent.name === 'AMAZON.StopIntent';
+  },
+  handle(handlerInput) {
+    const requestAttributes = handlerInput.attributesManager.getRequestAttributes();
+    const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
+
+    console.log('StopIntent received');
+
+    sendPausePlayback();
+    
+    const itemName = 'norway 2017';
+    const cardTitle = requestAttributes.t('DISPLAY_CARD_TITLE', requestAttributes.t('SKILL_NAME'), itemName);
+
+    return handlerInput.responseBuilder
+    .speak('pause playback')
+    .withSimpleCard(cardTitle, itemName)
+    .withShouldEndSession(false)
+    .getResponse();
+  },
+};
+
 const HelpHandler = {
   canHandle(handlerInput) {
     return handlerInput.requestEnvelope.request.type === 'IntentRequest'
@@ -335,6 +388,7 @@ exports.handler = skillBuilder
     RecipeHandler,
     HelpHandler,
     RepeatHandler,
+    StopHandler,
     ExitHandler,
     SessionEndedRequestHandler
   )

@@ -29,7 +29,12 @@
           "name": "AMAZON.HelpIntent"
         },
         {
-          "name": "AMAZON.StopIntent"
+          "name": "AMAZON.StopIntent",
+          "samples": [
+            "wait",
+            "pause",
+            "stop"
+          ]
         },
         {
           "name": "AMAZON.CancelIntent"
