@@ -74,103 +74,32 @@ function getOAuthToken() {
 }
 
 const sendPlayAlbum = (albumName) => {
-
-    // send custom command to BrightSign
-    jsonBody = {
-      'data': {
-        'command': 'album!!' + albumName.toLowerCase(),
-        'return immediately': true,
-      }
-    };
-
-    request({
-      url: 'https://wsdemo.brightsignnetwork.com/rest/v1/custom?destinationType=player&destinationName=D7D834000029',
-      method: "PUT",
-      auth: {
-        'bearer': accessToken,
-      },
-      json: true,
-      body: jsonBody
-    }, function (error, response, body) {
-
-      console.log('error');
-      console.log(error);
-
-      console.log('received response, body:');
-      console.log(response.body);
-
-      sendResumePlayback();
-    });
+  sendCommandToBrightSign('album!!' + albumName.toLowerCase());
+  sendResumePlayback();
 }
 
 const sendPausePlayback = () => {
-
-  jsonBody = {
-    'data': {
-      'command': 'pausePlayback',
-      'return immediately': true,
-    }
-  };
-
-  console.log('pausePlayback');
-
-  request({
-    url: 'https://wsdemo.brightsignnetwork.com/rest/v1/custom?destinationType=player&destinationName=D7D834000029',
-    method: "PUT",
-    auth: {
-      'bearer': accessToken,
-    },
-    json: true,
-    body: jsonBody
-  }, function (error, response, body) {
-
-    console.log('error');
-    console.log(error);
-
-    console.log('received response, body:');
-    console.log(response.body);
-  });
+  sendCommandToBrightSign('pausePlayback');
 }
 
 const sendResumePlayback = () => {
-
-  jsonBody = {
-    'data': {
-      'command': 'startPlayback',
-      'return immediately': true,
-    }
-  };
-
-  console.log('startPlayback');
-
-  request({
-    url: 'https://wsdemo.brightsignnetwork.com/rest/v1/custom?destinationType=player&destinationName=D7D834000029',
-    method: "PUT",
-    auth: {
-      'bearer': accessToken,
-    },
-    json: true,
-    body: jsonBody
-  }, function (error, response, body) {
-
-    console.log('error');
-    console.log(error);
-
-    console.log('received response, body:');
-    console.log(response.body);
-  });
+  sendCommandToBrightSign('startPlayback');
 }
 
 const sendRewindPlayback = () => {
+  sendCommandToBrightSign('rewind');
+}
+
+const sendCommandToBrightSign = (cmd) => {
 
   jsonBody = {
     'data': {
-      'command': 'rewind',
+      'command': cmd,
       'return immediately': true,
     }
   };
 
-  console.log('startPlayback');
+  console.log('send command: ', cmd);
 
   request({
     url: 'https://wsdemo.brightsignnetwork.com/rest/v1/custom?destinationType=player&destinationName=D7D834000029',
@@ -190,11 +119,10 @@ const sendRewindPlayback = () => {
   });
 }
 
-
-const RecipeHandler = {
+const AlbumHandler = {
   canHandle(handlerInput) {
     return handlerInput.requestEnvelope.request.type === 'IntentRequest'
-      && handlerInput.requestEnvelope.request.intent.name === 'RecipeIntent';
+      && handlerInput.requestEnvelope.request.intent.name === 'AlbumIntent';
   },
   handle(handlerInput) {
     const requestAttributes = handlerInput.attributesManager.getRequestAttributes();
@@ -204,7 +132,7 @@ const RecipeHandler = {
     let itemName;
     if (itemSlot && itemSlot.value) {
       itemName = itemSlot.value.toLowerCase();
-      console.log('RecipeHandler:');
+      console.log('AlbumHandler:');
       console.log(itemName);
     }
     else {
@@ -482,7 +410,7 @@ const LocalizationInterceptor = {
 exports.handler = skillBuilder
   .addRequestHandlers(
     LaunchRequestHandler,
-    RecipeHandler,
+    AlbumHandler,
     StopHandler,
     ResumeHandler,
     RewindHandler,
