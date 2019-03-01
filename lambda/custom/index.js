@@ -128,23 +128,13 @@ const AlbumHandler = {
     const requestAttributes = handlerInput.attributesManager.getRequestAttributes();
     const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
 
-    const itemSlot = handlerInput.requestEnvelope.request.intent.slots.Item;
-    let itemName;
-    if (itemSlot && itemSlot.value) {
-      itemName = itemSlot.value.toLowerCase();
-      console.log('AlbumHandler:');
-      console.log(itemName);
-    }
-    else {
-      console.log('No itemSlot found');
-      console.log(itemSlot);
-      console.log(itemSlot.value);
-    }
+    const itemName = getSlotItemName(handlerInput.requestEnvelope.request.intent.slots.Item);
 
     const cardTitle = requestAttributes.t('DISPLAY_CARD_TITLE', requestAttributes.t('SKILL_NAME'), itemName);
     let speakOutput = "";
 
     if (accessToken === '') {
+      console.log('no accessToken in albumHandler');
       speakOutput = requestAttributes.t('NO_ACCESS_TOKEN');
       const repromptSpeech = requestAttributes.t('NO_ACCESS_TOKEN_REPROMPT');
       speakOutput += repromptSpeech;
@@ -161,17 +151,10 @@ const AlbumHandler = {
     }
     else if (itemName !== '') {
 
-      // check to see if album is in the list
-      sendPlayAlbum(itemName);
-
       sessionAttributes.speakOutput = itemName;
       handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
 
-      console.log('album name specified as:');
-      console.log(itemName);
-      console.log(sessionAttributes.speakOutput);
-      console.log(cardTitle);
-
+      // need to check to see if this is a valid albumName (itemName).
       return handlerInput.responseBuilder
         .speak(sessionAttributes.speakOutput) // .reprompt(sessionAttributes.repromptSpeech)
         .withSimpleCard(cardTitle, itemName)
@@ -180,13 +163,11 @@ const AlbumHandler = {
         .getResponse();
     }
     else {
+      const utterance = getSlotItemUtterance(handlerInput.requestEnvelope.request.intent.slots.Item);
+
       speakOutput = requestAttributes.t('ALBUM_NOT_FOUND_MESSAGE');
       const repromptSpeech = requestAttributes.t('ALBUM_NOT_FOUND_REPROMPT');
-      if (itemName) {
-        speakOutput += requestAttributes.t('ALBUM_NOT_FOUND_WITH_ITEM_NAME', itemName);
-      } else {
-        speakOutput += requestAttributes.t('ALBUM_NOT_FOUND_WITHOUT_ITEM_NAME');
-      }
+      speakOutput += requestAttributes.t('ALBUM_NOT_FOUND_WITH_ITEM_NAME', utterance);
       speakOutput += repromptSpeech;
 
       sessionAttributes.speakOutput = speakOutput; //saving speakOutput to attributes, so we can use it to repeat
@@ -201,6 +182,30 @@ const AlbumHandler = {
     }
   }
 };
+
+function getSlotItemName(itemSlot) {
+  let itemName = '';
+  if (itemSlot && itemSlot.value) {
+    const resolutions = itemSlot.resolutions;
+    if (resolutions && resolutions.resolutionsPerAuthority) {
+      resolutions.resolutionsPerAuthority.forEach( (authorityData) => {
+        if (authorityData && authorityData.status && authorityData.status.code &&
+          authorityData.status.code === 'ER_SUCCESS_MATCH') {
+            itemName = itemSlot.value;
+            return;
+        }
+      }) 
+    }
+  }
+  return itemName;
+}
+
+function getSlotItemUtterance(itemSlot) {
+  if (itemSlot && itemSlot.value) {
+    return itemSlot.value;
+  }
+  return '';
+}
 
 const StopHandler = {
   canHandle(handlerInput) {
@@ -336,6 +341,22 @@ const ExitHandler = {
   },
 };
 
+const FallbackHandler = {
+  canHandle(handlerInput) {
+    return handlerInput.requestEnvelope.request.type === 'IntentRequest'
+      && (handlerInput.requestEnvelope.request.intent.name === 'AMAZON.FallbackIntent');
+  },
+  handle(handlerInput) {
+    const requestAttributes = handlerInput.attributesManager.getRequestAttributes();
+    const speakOutput = 'Command not recognized, try again';
+
+    return handlerInput.responseBuilder
+      .speak(speakOutput)
+      .withShouldEndSession(false)
+      .getResponse();
+  },
+};
+
 const SessionEndedRequestHandler = {
   canHandle(handlerInput) {
     console.log("Inside SessionEndedRequestHandler");
@@ -417,6 +438,7 @@ exports.handler = skillBuilder
     HelpHandler,
     RepeatHandler,
     ExitHandler,
+    FallbackHandler,
     SessionEndedRequestHandler
   )
   .addRequestInterceptors(LocalizationInterceptor)
