@@ -5,7 +5,6 @@ const Alexa = require('ask-sdk-core');
 const i18n = require('i18next');
 const sprintf = require('i18next-sprintf-postprocessor');
 const https = require('https');
-const request = require('request');
 const bsCore = require('@brightsign/bscore');
 const bsnConnector = require('@brightsign/bsnconnector');
 const bsnGetSession = bsnConnector.bsnGetSession;
@@ -13,8 +12,12 @@ const bsnConnectorConfig = bsnConnector.bsnConnectorConfig;
 const dwsManager = require('@brightsign/bs-dws-manager');
 const getDwsConnector = dwsManager.getDwsConnector;
 
+console.log('getBrightSignInterface');
+const brightSignInterface = require('./brightSignInterface');
+console.log('brightSignInterface');
+console.log(brightSignInterface);
+
 var accessToken = '';
-var noBsMode = true;
 
 /* INTENT HANDLERS */
 const LaunchRequestHandler = {
@@ -22,13 +25,16 @@ const LaunchRequestHandler = {
     return handlerInput.requestEnvelope.request.type === 'LaunchRequest';
   },
   handle(handlerInput) {
+
+    console.log('enter LaunchRequestHandler');
+
     const requestAttributes = handlerInput.attributesManager.getRequestAttributes();
     const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
 
     // connectToPreviewServer();
 
     console.log('invoke getOAuthToken');
-    getOAuthToken();
+    brightSignInterface.getOAuthToken();
 
     const speakOutput = requestAttributes.t('WELCOME_MESSAGE', requestAttributes.t('SKILL_NAME'));
     console.log('speakOutput');
@@ -47,87 +53,6 @@ const LaunchRequestHandler = {
   },
 };
 
-function getOAuthToken() {
-
-  if (noBsMode) {
-    return;
-  }
-  
-  var jsonBody =
-  {
-    "grant_type": "password",
-    "username": "ted@brightsign.biz",
-    "password": "P@ssw0rd"
-  };
-
-  request({
-    url: 'https://oademo.brightsignnetwork.com/v1/token',
-    method: "POST",
-    auth: {
-      'user': '8ybX72Gt',
-      'pass': 'oJkARlw1-Ta2G-5WMo-gKJ3-5RxvHpaD5Ngk'
-    },
-    json: true,
-    body: jsonBody
-  }, function (error, response, body) {
-
-    console.log('received response, accessToken:');
-    console.log(response.body.access_token);
-
-    accessToken = response.body.access_token;
-  });
-}
-
-const sendPlayAlbum = (albumName) => {
-  sendCommandToBrightSign('album!!' + albumName.toLowerCase());
-  sendResumePlayback();
-}
-
-const sendPausePlayback = () => {
-  sendCommandToBrightSign('pausePlayback');
-}
-
-const sendResumePlayback = () => {
-  sendCommandToBrightSign('startPlayback');
-}
-
-const sendRewindPlayback = () => {
-  sendCommandToBrightSign('rewind');
-}
-
-const sendCommandToBrightSign = (cmd) => {
-
-  if (noBsMode) {
-    return;
-  }
-  
-  jsonBody = {
-    'data': {
-      'command': cmd,
-      'return immediately': true,
-    }
-  };
-
-  console.log('send command: ', cmd);
-
-  request({
-    url: 'https://wsdemo.brightsignnetwork.com/rest/v1/custom?destinationType=player&destinationName=D7D834000029',
-    method: "PUT",
-    auth: {
-      'bearer': accessToken,
-    },
-    json: true,
-    body: jsonBody
-  }, function (error, response, body) {
-
-    console.log('error');
-    console.log(error);
-
-    console.log('received response, body:');
-    console.log(response.body);
-  });
-}
-
 const AlbumHandler = {
   canHandle(handlerInput) {
     return handlerInput.requestEnvelope.request.type === 'IntentRequest'
@@ -142,7 +67,7 @@ const AlbumHandler = {
     const cardTitle = requestAttributes.t('DISPLAY_CARD_TITLE', requestAttributes.t('SKILL_NAME'), itemName);
     let speakOutput = "";
 
-    if (accessToken === '' && !noBsMode) {
+    if (accessToken === '' && !brightSignInterface.noBsMode) {
       console.log('no accessToken in albumHandler');
       speakOutput = requestAttributes.t('NO_ACCESS_TOKEN');
       const repromptSpeech = requestAttributes.t('NO_ACCESS_TOKEN_REPROMPT');
@@ -163,7 +88,7 @@ const AlbumHandler = {
       sessionAttributes.speakOutput = itemName;
       handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
 
-      sendPlayAlbum(itemName);
+      brightSignInterface.sendPlayAlbum(itemName);
 
       return handlerInput.responseBuilder
         .speak(sessionAttributes.speakOutput) // .reprompt(sessionAttributes.repromptSpeech)
@@ -228,7 +153,7 @@ const StopHandler = {
 
     console.log('StopIntent received');
 
-    sendPausePlayback();
+    brightSignInterface.sendPausePlayback();
 
     const speakOutput = 'pause playback';
 
@@ -256,7 +181,7 @@ const ResumeHandler = {
 
     console.log('ResumeIntent received');
 
-    sendResumePlayback();
+    brightSignInterface.sendResumePlayback();
 
     const speakOutput = 'resume playback';
 
@@ -284,7 +209,7 @@ const RewindHandler = {
 
     console.log('RewindIntent received');
 
-    sendRewindPlayback();
+    brightSignInterface.sendRewindPlayback();
 
     const speakOutput = 'rewind playback';
 
