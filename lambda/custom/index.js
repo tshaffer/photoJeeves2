@@ -14,6 +14,7 @@ const dwsManager = require('@brightsign/bs-dws-manager');
 const getDwsConnector = dwsManager.getDwsConnector;
 
 var accessToken = '';
+var noBsMode = true;
 
 /* INTENT HANDLERS */
 const LaunchRequestHandler = {
@@ -48,6 +49,10 @@ const LaunchRequestHandler = {
 
 function getOAuthToken() {
 
+  if (noBsMode) {
+    return;
+  }
+  
   var jsonBody =
   {
     "grant_type": "password",
@@ -92,6 +97,10 @@ const sendRewindPlayback = () => {
 
 const sendCommandToBrightSign = (cmd) => {
 
+  if (noBsMode) {
+    return;
+  }
+  
   jsonBody = {
     'data': {
       'command': cmd,
@@ -133,7 +142,7 @@ const AlbumHandler = {
     const cardTitle = requestAttributes.t('DISPLAY_CARD_TITLE', requestAttributes.t('SKILL_NAME'), itemName);
     let speakOutput = "";
 
-    if (accessToken === '') {
+    if (accessToken === '' && !noBsMode) {
       console.log('no accessToken in albumHandler');
       speakOutput = requestAttributes.t('NO_ACCESS_TOKEN');
       const repromptSpeech = requestAttributes.t('NO_ACCESS_TOKEN_REPROMPT');
@@ -154,7 +163,8 @@ const AlbumHandler = {
       sessionAttributes.speakOutput = itemName;
       handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
 
-      // need to check to see if this is a valid albumName (itemName).
+      sendPlayAlbum(itemName);
+
       return handlerInput.responseBuilder
         .speak(sessionAttributes.speakOutput) // .reprompt(sessionAttributes.repromptSpeech)
         .withSimpleCard(cardTitle, itemName)
